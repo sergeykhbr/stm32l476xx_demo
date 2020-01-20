@@ -7,14 +7,12 @@ OBJCOPY=arm-none-eabi-objcopy
 
 #FPU_FLAGS=-mfloat-abi=hard -mfpu=fpv4-sp-d16
 FPU_FLAGS=-mfloat-abi=soft
-CFLAGS=$(FPU_FLAGS) -c --std=gnu11 -mcpu=cortex-m4 -mthumb -Og
+CFLAGS=$(FPU_FLAGS) -c --std=gnu11 -mcpu=cortex-m4 -mthumb -O0
 CFLAGS+=-fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections
 CFLAGS+=-ffreestanding -fno-move-loop-invariants -Wall -Wextra -g3
 CFLAGS+=-DDEBUG -DSTM32L476xx -DTRACE -MMD -MP
-# -MMD -MP -MF"$(@:%.o=%.d)"  -MT"$(@)" 
-# -MF"$(@:%.o=%.d)"  -MT"$(@)" 
 
-LDFLAGS=-mcpu=cortex-m4 -mthumb $(FPU_FLAGS) -Og -fmessage-length=0
+LDFLAGS=-mcpu=cortex-m4 -mthumb $(FPU_FLAGS) -O0 -fmessage-length=0
 LDFLAGS+=-fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants
 LDFLAGS+=-Wall -Wextra  -g3 -T mem.ld -T libs.ld -T sections.ld -nostartfiles -Xlinker --gc-sections
 LDFLAGS+=-L"ldscripts" -Wl,-Map,"stm32l476xx_demo.map" --specs=nano.specs
