@@ -1,0 +1,143 @@
+include makeutil.mak
+
+CC=arm-none-eabi-gcc
+CPP=arm-none-eabi-gcc
+OBJDUMP=arm-none-eabi-objdump
+OBJCOPY=arm-none-eabi-objcopy
+
+#FPU_FLAGS=-mfloat-abi=hard -mfpu=fpv4-sp-d16
+FPU_FLAGS=-mfloat-abi=soft
+CFLAGS=$(FPU_FLAGS) -c --std=gnu11 -mcpu=cortex-m4 -mthumb -Og
+CFLAGS+=-fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections
+CFLAGS+=-ffreestanding -fno-move-loop-invariants -Wall -Wextra -g3
+CFLAGS+=-DDEBUG -DSTM32L476xx -DTRACE -MMD -MP
+# -MMD -MP -MF"$(@:%.o=%.d)"  -MT"$(@)" 
+# -MF"$(@:%.o=%.d)"  -MT"$(@)" 
+
+LDFLAGS=-mcpu=cortex-m4 -mthumb $(FPU_FLAGS) -Og -fmessage-length=0
+LDFLAGS+=-fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants
+LDFLAGS+=-Wall -Wextra  -g3 -T mem.ld -T libs.ld -T sections.ld -nostartfiles -Xlinker --gc-sections
+LDFLAGS+=-L"ldscripts" -Wl,-Map,"stm32l476xx_demo.map" --specs=nano.specs
+DUMPFLAGS=--disassemble-all --disassemble-zeroes --section=.text \
+	 --section=.text.startup --section=.text.init --section=.isr_vector --section=.data
+
+INCL_KEY=-I
+DIR_KEY=-B
+
+INCL_PATH= \
+	$(TOP_DIR)src/hal \
+	$(TOP_DIR)src/include \
+	$(TOP_DIR)src/system/include \
+	$(TOP_DIR)src/system/include/cmsis \
+	$(TOP_DIR)src/system/include/DEVICE \
+	$(TOP_DIR)src/scheduler \
+	$(TOP_DIR)src/scheduler/OS \
+	$(TOP_DIR)src/scheduler/timers \
+	$(TOP_DIR)src/buttons \
+	$(TOP_DIR)src/technician/manual_tests \
+
+
+# source files directories list:
+SRC_PATH = \
+	$(TOP_DIR)src/buttons \
+	$(TOP_DIR)src/hal \
+	$(TOP_DIR)src/scheduler/OS \
+	$(TOP_DIR)src/scheduler/timers \
+	$(TOP_DIR)src \
+	$(TOP_DIR)src/system/src/DEVICE \
+	$(TOP_DIR)src/system/src/cmsis \
+	$(TOP_DIR)src/system/src/cortexm \
+	$(TOP_DIR)src/system/src/diag \
+	$(TOP_DIR)src/system/src/newlib \
+	$(TOP_DIR)src/technician/manual_tests
+
+
+LIB_NAMES =\
+	stdc++ \
+	c \
+	m
+
+VPATH = $(SRC_PATH)
+
+SOURCES = \
+	alarm_test \
+	buttons_test \
+	display_test \
+	door_test \
+	game \
+	manual_tests_menu \
+	motor_test \
+	sound_test \
+	tetris_test \
+	_cxx \
+	_exit \
+	_sbrk \
+	_startup \
+	_syscalls \
+	assert \
+	Trace \
+	trace_impl \
+	_initialize_hardware \
+	_reset_hardware \
+	exception_handlers \
+	vectors_stm32l476 \
+	system_stm32l4xx \
+	InterruptsHandlers \
+	_write \
+	display \
+	font \
+	leds \
+	main \
+	motor \
+	sound \
+	timers \
+	taskmgr \
+	button_config \
+	button_hal \
+	power_hal \
+	buttons \
+
+
+OBJ_FILES = $(addsuffix .o,$(SOURCES))
+EXECUTABLE = stm32l476xx_demo
+ELFFILE = $(EXECUTABLE).elf
+DUMPFILE = $(EXECUTABLE).dump
+HEXFILE = $(EXECUTABLE).hex
+LSTFILE = $(EXECUTABLE).lst
+
+all: demo
+
+.PHONY: $(ELFFILE) $(DUMPFILE)
+
+
+demo: $(ELFFILE) $(DUMPFILE) $(HEXFILE)
+$(HEXFILE): $(ELFFILE)
+	echo $(OBJCOPY) -O ihex $(addprefix $(ELF_DIR)/,$<) $(addprefix $(ELF_DIR)/,$@)
+	$(OBJCOPY) -O ihex $(addprefix $(ELF_DIR)/,$<) $(addprefix $(ELF_DIR)/,$@)
+
+
+$(DUMPFILE): $(ELFFILE)
+	echo $(OBJDUMP) $(DUMPFLAGS) $(addprefix $(ELF_DIR)/,$<) > $(addprefix $(ELF_DIR)/,$@)
+	$(OBJDUMP) $(DUMPFLAGS) $(addprefix $(ELF_DIR)/,$<) > $(addprefix $(ELF_DIR)/,$@)
+	$(OBJDUMP) -S $(addprefix $(ELF_DIR)/,$<) > $(addprefix $(ELF_DIR)/,$(LSTFILE))
+
+
+$(ELFFILE): $(OBJ_FILES)
+	echo $(CPP) $(LDFLAGS) $(addprefix $(OBJ_DIR)/,$(OBJ_FILES)) -o $(addprefix $(ELF_DIR)/,$@) $(addprefix -l,$(LIB_NAMES))
+	$(CPP) $(LDFLAGS) $(addprefix $(OBJ_DIR)/,$(OBJ_FILES)) -o $(addprefix $(ELF_DIR)/,$@) $(addprefix -l,$(LIB_NAMES))
+	$(ECHO) "\n  Shared Library has been built successfully.\n"
+
+#.cpp.o:
+%.o: %.cpp
+	echo $(CPP) $(CFLAGS) $(addprefix $(INCL_KEY),$(INCL_PATH)) $< -o $(addprefix $(OBJ_DIR)/,$@)
+	$(CPP) $(CFLAGS) $(addprefix $(INCL_KEY),$(INCL_PATH)) $< -o $(addprefix $(OBJ_DIR)/,$@)
+
+#.c.o:
+%.o: %.c
+	echo $(CC) $(CFLAGS) $(addprefix $(INCL_KEY),$(INCL_PATH)) $< -o $(addprefix $(OBJ_DIR)/,$@)
+	$(CC) $(CFLAGS) $(addprefix $(INCL_KEY),$(INCL_PATH)) $< -o $(addprefix $(OBJ_DIR)/,$@)
+
+%.o: %.s
+	echo $(CC) $(CFLAGS) -D__ASSEMBLY__=1 $(addprefix $(INCL_KEY),$(INCL_PATH)) $< -o $(addprefix $(OBJ_DIR)/,$@)
+	$(CC) $(CFLAGS) -D__ASSEMBLY__=1 $(addprefix $(INCL_KEY),$(INCL_PATH)) $< -o $(addprefix $(OBJ_DIR)/,$@)
+

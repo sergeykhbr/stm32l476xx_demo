@@ -1,0 +1,4 @@
+obj
+*.dump
+*.elf
+*.map
