@@ -56,7 +56,7 @@ uint32_t timerRemain(void)
 }
 
 /**
- * Функция требует использования только при внешнем отключении прерываний!
+ * This function ust be used only when external interrupts are disabled!
 */
 TIME_T timerElapseSinceLastTime(void)
 {

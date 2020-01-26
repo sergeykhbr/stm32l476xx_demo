@@ -16,12 +16,12 @@ typedef enum{
 }buttonPress_t;
 
 typedef enum {
-  BUTTON_NOT_PRESSED,                                                           /**< кнопка не нажата */
-  BUTTON_PRESSED,                                                               /**< кнопка нажата */
+  BUTTON_NOT_PRESSED,
+  BUTTON_PRESSED,
   BUTTON_STATE_UNDEFINED // OFF or breaked
 }buttonState_t;
 
-typedef void (*buttonInit_t)(buttonInitState_t); // функция инициализации кнопки
+typedef void (*buttonInit_t)(buttonInitState_t); // Button initialization
 typedef buttonState_t (*buttonGetState_t)(void);
 
 typedef struct{

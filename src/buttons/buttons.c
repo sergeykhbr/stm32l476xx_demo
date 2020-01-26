@@ -32,7 +32,7 @@ static buttonData_t button[Button_Last];
 static void buttonTaskProcess(uint32_t parameter);
 static void buttonPressTask(uint32_t parameter);
 
-// Функция инциализации модуля
+// Function initialization module
 void buttonInit(const buttonInitStruct_t *buttonInitData, uint8_t buttonNumber){
 	memset(button, 0, sizeof(button));
 
@@ -51,7 +51,7 @@ void buttonInit(const buttonInitStruct_t *buttonInitData, uint8_t buttonNumber){
 			button[buttonId].init = buttonInitData[i].init;
 			button[buttonId].getState = buttonInitData[i].getState;
 
-			// Вопрос корректности. Надо подумать, что должно быть при включении устройства.
+			// TODO: what should happen after power-on reset
 			//
 			button[buttonId].init(btON);
 			button[buttonId].state = button[buttonId].getState();
@@ -69,9 +69,9 @@ void setButtonHandler(uint8_t buttonId, task_t callBack) {
     }
 }
 void buttonInterruptHandler(uint8_t buttonId){
-// Выключили прерывания кнопочки
+  // Turn-off buttons interrupt
   button[buttonId].init(btOFF);
-  // С отлюченными прерываниями можно и обработать антидребезг. Сделано для уменьшения сработки прерываний
+  // Button jitter mitigation logic with disabled interrupt
   osTaskAdd(buttonTaskProcess, buttonId, 0);
 }
 
@@ -118,23 +118,23 @@ static void buttonTaskProcess(uint32_t parameter){
 		osTaskAdd(buttonTaskProcess, buttonId, timeBetweenChecks);
 	}
 	else if(antiBounceState == antiBounceOk){
-		//Зафиксировали нажатие или отжатие
-		// Нужно анализировать
-		// Включаем кнопку
+		// Button press and release
+		//   Need to analize button
+		//   Enabling button
 		button[buttonId].init(btON);
 		if(button[buttonId].state == BUTTON_PRESSED){
-			// Кнопку нажали
+			// Button was pressed
 			button[buttonId].pressType = BUTTON_PRESS_SHORT;
-			// Варианты Нажатие до 500 мс
-			// Длинное нажатие от 500 до 1500 мс
-			// Залипание более 1500мс
-			// Ждем
+			// Ordinar button pressed up to 500 ms
+			// Long button press 500 up to 1500 ms
+			// Button hold-on more than 1500 ms
+			// Waiting
 			TIME_T taskTime = BUTTON_PRESS_TIME - (button[buttonId].antiBounceSummary * timeBetweenChecks); // TODO check validity
 			osTaskAdd(buttonPressTask, buttonId, taskTime);
 		}
 		else{
-			// Кнопку отжали
-			// Нажатие окончилось
+			// Button was released
+			// press is over
 			if(button[buttonId].pressType != BUTTON_PRESS_NONE){
 				osTaskDelId(button[buttonId].taskId, buttonPressTask);
 			}

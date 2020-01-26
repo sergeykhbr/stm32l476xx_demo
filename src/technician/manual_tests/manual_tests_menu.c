@@ -19,7 +19,7 @@ static ManualTest_t currentTest;
 static char *manualTests[ManualTestLast] = {
     "Door test",
     "Keyboard test",
-    "Auriga Tetris",
+    "Tetris",
     "Display test",
     "Motor test",
     "Sound test",

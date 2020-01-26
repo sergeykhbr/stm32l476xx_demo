@@ -362,11 +362,12 @@ void display01() {
     enterxxx();
     setFontSize(32);
     fillhx(16);
-    grafchar(0x5D);
-    grafchar(0x5E);
+    //grafchar(0x5B); // 5b
+    //grafchar(0x7E);
+    putstr("   Auriga");
     grafchar(' ');
     column1 = currentColumn;
-    putstr("BodyGuard");
+    putstr("SimTech");
     column2 = currentColumn;
     setFontSize(8);
     putstr("TM");
@@ -387,7 +388,7 @@ void display01() {
     setFontSize(16);
     fillhx(16);
     setFgColor(0xf483);
-    putstr("NextGen Demo version");
+    putstr("STM32L4xx Demo firmware");
     enterxxx();
     setFontSize(12);
     enterxxx();
@@ -412,7 +413,7 @@ void display01() {
     fillhx(16);
     putstr("Production Date: ");
     fillhx(150);
-    putstr("12-Nov-2019");
+    putstr("24-Jan-2020");
     enterxxx();
     enterxxx();
 }
