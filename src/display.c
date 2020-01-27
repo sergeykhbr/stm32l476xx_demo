@@ -364,13 +364,13 @@ void display01() {
     fillhx(16);
     //grafchar(0x5B); // 5b
     //grafchar(0x7E);
-    putstr("   Auriga");
+    putstr("Sergey Khabarov");
     grafchar(' ');
     column1 = currentColumn;
-    putstr("SimTech");
+    putstr("Sim");
     column2 = currentColumn;
     setFontSize(8);
-    putstr("TM");
+    putstr("R");
     setFontSize(32);
     enterxxx();
     setFontSize(8);
